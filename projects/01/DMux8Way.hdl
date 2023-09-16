@@ -17,4 +17,22 @@ CHIP DMux8Way {
 
     PARTS:
     // Put your code here:
+        DMux4Way(in=in, sel=sel[0..1], a=a1, b=b1, c=c1, d=d1);
+        DMux4Way(in=in, sel=sel[0..1], a=e1, b=f1, c=g1, d=h1);
+        DMux4Way(in=in, sel=sel[1..2], a=a2, b=c2, c=e2, d=g2);
+        DMux4Way(in=in, sel=sel[1..2], a=b2, b=d2, c=f2, d=h2);
+
+        And(a=a1, b=a2, out=a);
+        And(a=b1, b=b2, out=b);
+        And(a=c1, b=c2, out=c);
+        And(a=d1, b=d2, out=d);
+        And(a=e1, b=e2, out=e);
+        And(a=f1, b=f2, out=f);
+        And(a=g1, b=g2, out=g);
+        And(a=h1, b=h2, out=h);
+
+        /* Here we actually demuxed out each output 4 times when
+        it should have been only 3 times. The selector bit at index
+        1 is used twice but it doesn't affect the outputs. It is like
+        evaluating a0 and a1 and a1 and a2, then assigning this to a. */        
 }
