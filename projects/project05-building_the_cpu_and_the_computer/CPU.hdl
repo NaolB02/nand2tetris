@@ -40,4 +40,38 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+        Not(in=instruction[15], out=NotOp);
+        Not(in=instruction[5], out=Notd1);
+        Mux(a=NotOp, b=Notd1, sel=instruction[15], out=cMux);
+        Mux16(a=ALUout, b=instruction, sel=cMux, out=FirstMuxOut);
+        // The first mux finished
+
+        Or(a=instruction[5], b=NotOp, out=cAReg);
+        ARegister(in=FirstMuxOut, load=cAReg, out=AValue, out[0..14]=addressM);
+        // The ARegister finished
+
+        Or(a=instruction[3], b=false, out=d3);
+        And(a=instruction[15], b=d3, out=writeM);
+        // The writeM set
+
+        And(a=instruction[15], b=instruction[4], out=DLoad);
+        DRegister(in=ALUout, load=DLoad, out=DValue);
+        // The DRegister finished
+
+        Mux16(a=AValue, b=inM, sel=instruction[12], out=AMuxM);
+        ALU(x=DValue, y=AMuxM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUout, out=outM, zr=isZero, ng=isNeg);
+        // The ALU finished
+
+        Not(in=isZero, out=NotZero);
+        Not(in=isNeg, out=NotNeg);
+        And(a=NotZero, b=NotNeg, out=isPos);
+        And(a=isZero, b=instruction[1], out=zeroness);
+        And(a=isNeg, b=instruction[2], out=negness);
+        And(a=isPos, b=instruction[0], out=posness);
+        Or(a=zeroness, b=negness, out=mid);
+        Or(a=mid, b=posness, out=final);
+        And(a=final, b=instruction[15], out=pcLoad);
+        PC(in=AValue, load=pcLoad, inc=true, reset=reset, out[0..14]=pc);
+        // The PC finished
+        
 }
